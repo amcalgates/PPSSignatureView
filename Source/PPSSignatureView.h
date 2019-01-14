@@ -10,6 +10,10 @@
 @property(nonatomic) CGFloat strokeWidthMin;
 @property(nonatomic) CGFloat strokeWidthMax;
 
+@property(nonatomic, readonly) BOOL drawnSignature;
+
+@property(nonatomic) CGFloat minimumSignatureWidth;
+
 - (void)erase;
 
 @end

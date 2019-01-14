@@ -106,12 +106,20 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
     CGPoint previousMidPoint;
     PPSSignaturePoint previousVertex;
     PPSSignaturePoint currentVelocity;
+    
+    CGFloat signatureXMinimum;
+    CGFloat signatureXMaximum;
 }
+
+@property(nonatomic) CGFloat signatureXMinimum;
+@property(nonatomic) CGFloat signatureXMaximum;
 
 @end
 
 
 @implementation PPSSignatureView
+
+@synthesize signatureXMaximum, signatureXMinimum;
 
 
 - (void)commonInit {
@@ -146,10 +154,6 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
         tap.cancelsTouchesInView = YES;
         [self addGestureRecognizer:tap];
         
-        // Erase with long press
-        UILongPressGestureRecognizer *longer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
-        longer.cancelsTouchesInView = YES;
-        [self addGestureRecognizer:longer];
         
     } else [NSException raise:@"NSOpenGLES2ContextException" format:@"Failed to create OpenGL ES2 context"];
 }
@@ -234,6 +238,8 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 - (void)tap:(UITapGestureRecognizer *)t {
     CGPoint l = [t locationInView:self];
     
+    [self updateMinAndMaxWithX:l.x];
+    
     if (t.state == UIGestureRecognizerStateRecognized) {
         glBindBuffer(GL_ARRAY_BUFFER, dotsBuffer);
         
@@ -273,16 +279,14 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 }
 
 
-- (void)longPress:(UILongPressGestureRecognizer *)lp {
-    [self erase];
-}
-
 - (void)pan:(UIPanGestureRecognizer *)p {
     
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     
     CGPoint v = [p velocityInView:self];
     CGPoint l = [p locationInView:self];
+    
+    [self updateMinAndMaxWithX:l.x];
     
     currentVelocity = ViewPointToGL(v, self.bounds, (GLKVector3){0,0,0});
     float distance = 0.;
@@ -488,6 +492,30 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
     glDeleteBuffers(1, &dotsBuffer);
     
     effect = nil;
+}
+
+- (void) updateMinAndMaxWithX:(CGFloat)x
+{
+    if( self.signatureXMinimum == -1 || x < self.signatureXMinimum )
+    {
+        self.signatureXMinimum = x;
+    }
+    
+    if( self.signatureXMaximum == -1 || x > self.signatureXMaximum )
+    {
+        self.signatureXMaximum = x;
+    }
+}
+
+- (void) resetMinAndMax
+{
+    self.signatureXMaximum = -1;
+    self.signatureXMinimum = -1;
+}
+
+-(BOOL) drawnSignature
+{
+    return abs((int)self.signatureXMaximum - (int)self.signatureXMinimum) > kMinimumSignatureWidth;
 }
 
 @end
