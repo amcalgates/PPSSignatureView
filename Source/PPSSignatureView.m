@@ -128,6 +128,8 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
     if (context) {
         time(NULL);
         
+        [self resetMinAndMax];
+        
         self.strokeWidthMin = 0.004;// Stroke width determined by touch velocity
         self.strokeWidthMax = 0.030;
         
@@ -205,6 +207,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 
 
 - (void)erase {
+    [self resetMinAndMax];
     length = 0;
     dotsLength = 0;
     self.hasSignature = NO;
