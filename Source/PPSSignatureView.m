@@ -515,7 +515,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 
 -(BOOL) drawnSignature
 {
-    return abs((int)self.signatureXMaximum - (int)self.signatureXMinimum) > kMinimumSignatureWidth;
+    return abs((int)self.signatureXMaximum - (int)self.signatureXMinimum) > self.minimumSignatureWidth;
 }
 
 @end
