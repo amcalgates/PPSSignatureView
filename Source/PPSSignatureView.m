@@ -107,19 +107,17 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
     PPSSignaturePoint previousVertex;
     PPSSignaturePoint currentVelocity;
     
-    CGFloat signatureXMinimum;
-    CGFloat signatureXMaximum;
 }
-
-@property(nonatomic) CGFloat signatureXMinimum;
-@property(nonatomic) CGFloat signatureXMaximum;
 
 @end
 
 
 @implementation PPSSignatureView
 
-@synthesize signatureXMaximum, signatureXMinimum;
+@synthesize signatureMinX = _signatureMinX;
+@synthesize signatureMaxX = _signatureMaxX;
+@synthesize signatureMinY = _signatureMinY;
+@synthesize signatureMaxY = _signatureMaxY;
 
 
 - (void)commonInit {
@@ -241,7 +239,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 - (void)tap:(UITapGestureRecognizer *)t {
     CGPoint l = [t locationInView:self];
     
-    [self updateMinAndMaxWithX:l.x];
+    [self updateMinAndMaxWithPoint:l];
     
     if (t.state == UIGestureRecognizerStateRecognized) {
         glBindBuffer(GL_ARRAY_BUFFER, dotsBuffer);
@@ -289,7 +287,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
     CGPoint v = [p velocityInView:self];
     CGPoint l = [p locationInView:self];
     
-    [self updateMinAndMaxWithX:l.x];
+    [self updateMinAndMaxWithPoint:l];
     
     currentVelocity = ViewPointToGL(v, self.bounds, (GLKVector3){0,0,0});
     float distance = 0.;
@@ -497,28 +495,43 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
     effect = nil;
 }
 
-- (void) updateMinAndMaxWithX:(CGFloat)x
+- (void) updateMinAndMaxWithPoint:(CGPoint)point
 {
-    if( self.signatureXMinimum == -1 || x < self.signatureXMinimum )
+    CGFloat x = point.x;
+    CGFloat y = point.y;
+    
+    if( _signatureMinX == -1 || x < _signatureMinX )
     {
-        self.signatureXMinimum = x;
+        _signatureMinX = x;
     }
     
-    if( self.signatureXMaximum == -1 || x > self.signatureXMaximum )
+    if( _signatureMaxX == -1 || x > _signatureMaxX )
     {
-        self.signatureXMaximum = x;
+        _signatureMaxX = x;
+    }
+    
+    if( _signatureMinY == -1 || y < _signatureMinY )
+    {
+        _signatureMinY = y;
+    }
+    
+    if( _signatureMaxY == -1 || y > _signatureMaxY )
+    {
+        _signatureMaxY = y;
     }
 }
 
 - (void) resetMinAndMax
 {
-    self.signatureXMaximum = -1;
-    self.signatureXMinimum = -1;
+    _signatureMaxX = -1;
+    _signatureMinX = -1;
+    _signatureMaxY = -1;
+    _signatureMinY = -1;
 }
 
 -(BOOL) drawnSignature
 {
-    return abs((int)self.signatureXMaximum - (int)self.signatureXMinimum) > self.minimumSignatureWidth;
+    return abs((int)_signatureMaxX - (int)_signatureMinX) > self.minimumSignatureWidth;
 }
 
 @end

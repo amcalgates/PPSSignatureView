@@ -14,6 +14,11 @@
 
 @property(nonatomic) CGFloat minimumSignatureWidth;
 
+@property(nonatomic, readonly) CGFloat signatureMinX;
+@property(nonatomic, readonly) CGFloat signatureMaxX;
+@property(nonatomic, readonly) CGFloat signatureMinY;
+@property(nonatomic, readonly) CGFloat signatureMaxY;
+
 - (void)erase;
 
 @end
